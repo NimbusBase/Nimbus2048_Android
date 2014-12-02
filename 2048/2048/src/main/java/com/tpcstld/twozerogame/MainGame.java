@@ -106,14 +106,17 @@ public class MainGame {
     }
 
     private void recordHighScore() {
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
-        SharedPreferences.Editor editor = settings.edit();
+        //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
+        //SharedPreferences.Editor editor = settings.edit();
+        NimbusStorage settings = new NimbusStorage(mContext);
+        NimbusStorage.Editor editor = settings.edit();
         editor.putLong(HIGH_SCORE, highScore);
         editor.commit();
     }
 
     private long getHighScore() {
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
+        //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
+        NimbusStorage settings = new NimbusStorage(mContext);
         return settings.getLong(HIGH_SCORE, -1);
     }
 

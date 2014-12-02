@@ -69,8 +69,10 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void save() {
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = settings.edit();
+        //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        //SharedPreferences.Editor editor = settings.edit();
+        NimbusStorage settings = new NimbusStorage(this);
+        NimbusStorage.Editor editor = settings.edit();
         Tile[][] field = view.game.grid.field;
         Tile[][] undoField = view.game.grid.undoField;
         editor.putInt(WIDTH, field.length);
@@ -107,8 +109,8 @@ public class MainActivity extends ActionBarActivity {
     private void load() {
         //Stopping all animations
         view.game.aGrid.cancelAnimations();
-
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        NimbusStorage settings = new NimbusStorage(this);
+        //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         for (int xx = 0; xx < view.game.grid.field.length; xx++) {
             for (int yy = 0; yy < view.game.grid.field[0].length; yy++) {
                 int value = settings.getInt(xx + " " + yy, -1);
