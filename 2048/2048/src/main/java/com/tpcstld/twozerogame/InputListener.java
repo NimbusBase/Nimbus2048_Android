@@ -1,7 +1,9 @@
 package com.tpcstld.twozerogame;
 
+import android.content.Intent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 public class InputListener implements View.OnTouchListener {
 
@@ -116,6 +118,10 @@ public class InputListener implements View.OnTouchListener {
                         mView.game.newGame();
                     } else if (iconPressed(mView.sXUndo, mView.sYIcons)) {
                         mView.game.revertUndoState();
+                    } else if (iconPressed(mView.sXSync, mView.sYIcons)) {
+                        // new view for sync setting
+                        Toast.makeText(mView.getContext(), "Sync button touched", Toast.LENGTH_LONG).show();
+                        mView.getMainActivity().startSyncOptionActivity();
                     } else if (isTap(2) && inRange(mView.startingX, x, mView.endingX)
                         && inRange(mView.startingY, x, mView.endingY) && mView.continueButtonEnabled) {
                         mView.game.setEndlessMode();

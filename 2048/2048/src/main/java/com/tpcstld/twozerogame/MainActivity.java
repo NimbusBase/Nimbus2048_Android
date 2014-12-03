@@ -1,5 +1,6 @@
 package com.tpcstld.twozerogame;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
@@ -25,7 +26,7 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         view = new MainView(getBaseContext());
-
+        view.setMainActivity(this);
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         view.hasSaveState = settings.getBoolean("save_state", false);
 
@@ -35,6 +36,9 @@ public class MainActivity extends ActionBarActivity {
             }
         }
         setContentView(view);
+        // set up NimbusBase
+        Singleton.CONTEXT = getApplicationContext();
+        Singleton.base();
     }
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -104,6 +108,11 @@ public class MainActivity extends ActionBarActivity {
     protected void onResume() {
         super.onResume();
         load();
+    }
+
+    public void startSyncOptionActivity() {
+        Intent intent = new Intent(this, SyncOptionActivity.class);
+        startActivity(intent);
     }
 
     private void load() {

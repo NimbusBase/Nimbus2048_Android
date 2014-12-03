@@ -13,6 +13,8 @@ import android.view.View;
 import java.util.ArrayList;
 
 public class MainView extends View {
+    //Activity to start SyncOptionActivity
+    MainActivity activity;
 
     //Internal variables
     Paint paint = new Paint();
@@ -585,4 +587,11 @@ public class MainView extends View {
         game.newGame();
     }
 
+    public void setMainActivity(MainActivity activity) {
+        this.activity = activity;
+    }
+
+    public MainActivity getMainActivity() {
+        return activity;
+    }
 }
