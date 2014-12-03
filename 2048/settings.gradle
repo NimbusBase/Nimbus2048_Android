@@ -1,1 +1,2 @@
-include ':2048'
+include ':2048',
+        ':Libraries:BoxAndroidLibraryV2'

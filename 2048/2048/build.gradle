@@ -5,7 +5,7 @@ android {
     buildToolsVersion '19.1.0'
 
     defaultConfig {
-        minSdkVersion 7
+        minSdkVersion 14
         targetSdkVersion 19
         versionCode 17
         versionName "1.1.2a"
@@ -16,8 +16,30 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+
+    packagingOptions {
+        exclude 'LICENSE.txt'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/INDEX.LIST'
+    }
 }
 
 dependencies {
     compile 'com.android.support:appcompat-v7:19.1.0'
+    compile fileTree(dir: '../Libraries/DropboxClient2/lib', include: ['*.jar'])
+    compile 'com.box:boxandroidlibv2:3.0.4-SNAPSHOT@aar'
+    compile 'net.box:boxjavalibv2:3.0.9'
+    compile ('com.nimbusbase:nimbusbaseandroid:1.0-SNAPSHOT@aar') {
+        transitive = true
+        exclude group: 'commons-io', module: 'commons-io'
+    }
+}
+
+repositories {
+    flatDir {
+        dirs '../Libraries/BoxAndroidLibraryV2'
+    }
 }

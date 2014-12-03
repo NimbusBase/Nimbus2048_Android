@@ -56,6 +56,7 @@ public class MainView extends View {
     public int sYIcons;
     public int sXNewGame;
     public int sXUndo;
+    public int sXSync;
     public int iconSize;
 
     //Timing
@@ -218,6 +219,24 @@ public class MainView extends View {
                 sXUndo + iconPaddingSize,
                 sYIcons + iconPaddingSize,
                 sXUndo + iconSize - iconPaddingSize,
+                sYIcons + iconSize - iconPaddingSize
+        );
+    }
+
+    private void drawSyncButton(Canvas canvas) {
+
+        drawDrawable(canvas,
+                backgroundRectangle,
+                sXSync,
+                sYIcons, sXSync + iconSize,
+                sYIcons + iconSize
+        );
+
+        drawDrawable(canvas,
+                getResources().getDrawable(R.drawable.ic_action_settings),
+                sXSync + iconPaddingSize,
+                sYIcons + iconPaddingSize,
+                sXSync + iconSize - iconPaddingSize,
                 sYIcons + iconSize - iconPaddingSize
         );
     }
@@ -411,6 +430,7 @@ public class MainView extends View {
         drawHeader(canvas);
         drawNewGameButton(canvas, false);
         drawUndoButton(canvas);
+        drawSyncButton(canvas);
         drawBackground(canvas);
         drawBackgroundGrid(canvas);
         drawInstructions(canvas);
@@ -534,6 +554,7 @@ public class MainView extends View {
         sYIcons = (startingY + eYAll) / 2 - iconSize / 2;
         sXNewGame = (endingX - iconSize);
         sXUndo = sXNewGame - iconSize * 3 / 2 - iconPaddingSize;
+        sXSync = sXUndo - iconSize * 3 / 2 - iconPaddingSize;
         resyncTime();
     }
 
