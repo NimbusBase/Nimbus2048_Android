@@ -73,7 +73,7 @@ public class MainGame {
         }
         aGrid = new AnimationGrid(numSquaresX, numSquaresY);
         highScore = getHighScore();
-        if (score >= highScore) {
+        if (score > highScore && score != 0) {
             highScore = score;
             recordHighScore();
         }
@@ -117,7 +117,7 @@ public class MainGame {
     private long getHighScore() {
         //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
         NimbusStorage settings = new NimbusStorage(mContext);
-        return settings.getLong(HIGH_SCORE, -1);
+        return settings.getLong(HIGH_SCORE, 0);
     }
 
     private void prepareTiles() {
@@ -253,7 +253,7 @@ public class MainGame {
 
     private void endGame() {
         aGrid.startAnimation(-1, -1, FADE_GLOBAL_ANIMATION, NOTIFICATION_ANIMATION_TIME, NOTIFICATION_DELAY_TIME, null);
-        if (score >= highScore) {
+        if (score > highScore && score != 0) {
             highScore = score;
             recordHighScore();
         }
