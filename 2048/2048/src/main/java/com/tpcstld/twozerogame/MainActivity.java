@@ -76,6 +76,59 @@ public class MainActivity extends ActionBarActivity {
         //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         //SharedPreferences.Editor editor = settings.edit();
         NimbusStorage settings = new NimbusStorage(this);
+        // Check whether data changed
+        boolean differentFromStorage = false;
+        for (int xx = 0; xx < view.game.grid.field.length; xx++) {
+            if (differentFromStorage) {
+                break;
+            }
+            for (int yy = 0; yy < view.game.grid.field[0].length; yy++) {
+                int value = settings.getInt(xx + " " + yy, -1);
+                if (value > 0 &&
+                        (view.game.grid.field[xx][yy] == null ||
+                                value != view.game.grid.field[xx][yy].getValue())) {
+                    differentFromStorage = true;
+                    break;
+                } else if (value == 0 && view.game.grid.field[xx][yy] != null) {
+                    differentFromStorage = true;
+                    break;
+                }
+
+                int undoValue = settings.getInt(UNDO_GRID + xx + " " + yy, -1);
+                if (undoValue > 0 &&
+                        (view.game.grid.undoField[xx][yy] == null ||
+                                undoValue != view.game.grid.undoField[xx][yy].getValue())) {
+                    differentFromStorage = true;
+                     break;
+                } else if (undoValue == 0 && view.game.grid.undoField[xx][yy] != null) {
+                    differentFromStorage = true;
+                    break;
+                }
+            }
+        }
+
+        if (view.game.score != settings.getLong(SCORE, view.game.score)) {
+            differentFromStorage = true;
+        }
+        if (view.game.highScore != settings.getLong(HIGH_SCORE, view.game.highScore)) {
+            differentFromStorage = true;
+        };
+        if (view.game.lastScore != settings.getLong(UNDO_SCORE, view.game.lastScore)) {
+            differentFromStorage = true;
+        };
+        if (view.game.canUndo != settings.getBoolean(CAN_UNDO, view.game.canUndo)) {
+            differentFromStorage = true;
+        };
+        if (view.game.gameState != settings.getInt(GAME_STATE, view.game.gameState)) {
+            differentFromStorage = true;
+        };
+        if (view.game.lastGameState != settings.getInt(UNDO_GAME_STATE, view.game.lastGameState)) {
+            differentFromStorage = true;
+        };
+        if (!differentFromStorage) {
+            return;
+        }
+        // only save if current data is different from the storage
         NimbusStorage.Editor editor = settings.edit();
         Tile[][] field = view.game.grid.field;
         Tile[][] undoField = view.game.grid.undoField;

@@ -52,20 +52,24 @@ public class NimbusStorage extends SQLiteOpenHelper {
         Cursor cursor = readableDb.query(TABLE_NAME, new String[]{FIELD_VALUE},
                 FIELD_TYPE + "=? AND " + FIELD_NAME + "=?",
                 new String[]{type, name}, null, null, null);
-        if(cursor.moveToFirst()) {
-            if (cursor.isNull(0)) {
-                return defaultValue;
-            } else if (TYPE_INT.equals(type)) {
-                return cursor.getInt(0);
-            } else if (TYPE_LONG.equals(type)) {
-                return cursor.getLong(0);
-            } else if (TYPE_BOOLEAN.equals(type)) {
-                return cursor.getInt(0)>0?true:false;
-            }else {
+        try {
+            if (cursor.moveToFirst()) {
+                if (cursor.isNull(0)) {
+                    return defaultValue;
+                } else if (TYPE_INT.equals(type)) {
+                    return cursor.getInt(0);
+                } else if (TYPE_LONG.equals(type)) {
+                    return cursor.getLong(0);
+                } else if (TYPE_BOOLEAN.equals(type)) {
+                    return cursor.getInt(0) > 0 ? true : false;
+                } else {
+                    return defaultValue;
+                }
+            } else {
                 return defaultValue;
             }
-        } else {
-            return defaultValue;
+        } finally {
+            cursor.close();
         }
     }
 
@@ -100,8 +104,6 @@ public class NimbusStorage extends SQLiteOpenHelper {
             }
             try {
                 ContentValues values = new ContentValues();
-                values.put(FIELD_TYPE, type);
-                values.put(FIELD_NAME, name);
                 if (value == null) {
                     values.putNull(FIELD_VALUE);
                 } else if (value instanceof Integer) {
@@ -113,8 +115,16 @@ public class NimbusStorage extends SQLiteOpenHelper {
                 }else {
                     throw new Exception("Unsupported persistent type:"+value.getClass().getName());
                 }
-                long result = db.replaceOrThrow(TABLE_NAME, null, values);
-                if (result == -1) {
+                long updateResult = db.update(TABLE_NAME, values,
+                        FIELD_NAME + "=? AND " + FIELD_TYPE + "=?", new String[]{name, type});
+                if (updateResult == 0) {
+                    values.put(FIELD_TYPE, type);
+                    values.put(FIELD_NAME, name);
+                    long rowId = db.insertOrThrow(TABLE_NAME, null, values);
+                    if (rowId < 1) {
+                        error = new SQLException("An error occurred on insert.");
+                    }
+                } else if (updateResult != 1) {
                     error = new SQLException("An error occurred.");
                 }
             } catch (Throwable t) {

@@ -120,7 +120,6 @@ public class InputListener implements View.OnTouchListener {
                         mView.game.revertUndoState();
                     } else if (iconPressed(mView.sXSync, mView.sYIcons)) {
                         // new view for sync setting
-                        Toast.makeText(mView.getContext(), "Sync button touched", Toast.LENGTH_LONG).show();
                         mView.getMainActivity().startSyncOptionActivity();
                     } else if (isTap(2) && inRange(mView.startingX, x, mView.endingX)
                         && inRange(mView.startingY, x, mView.endingY) && mView.continueButtonEnabled) {
