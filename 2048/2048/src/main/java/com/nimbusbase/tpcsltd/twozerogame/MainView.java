@@ -1,4 +1,4 @@
-package com.tpcstld.twozerogame;
+package com.nimbusbase.tpcsltd.twozerogame;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -9,6 +9,8 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.View;
+
+import com.nimbusbase.tpcstld.twozerogame.R;
 
 import java.util.ArrayList;
 

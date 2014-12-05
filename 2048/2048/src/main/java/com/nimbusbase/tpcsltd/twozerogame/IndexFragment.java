@@ -1,7 +1,6 @@
-package com.tpcstld.twozerogame;
+package com.nimbusbase.tpcsltd.twozerogame;
 
 import android.app.ActionBar;
-import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
@@ -18,6 +17,7 @@ import com.nimbusbase.nimbusbase.promise.Callback;
 import com.nimbusbase.nimbusbase.promise.NMBError;
 import com.nimbusbase.nimbusbase.promise.Promise;
 import com.nimbusbase.nimbusbase.promise.Response;
+import com.nimbusbase.tpcstld.twozerogame.R;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;

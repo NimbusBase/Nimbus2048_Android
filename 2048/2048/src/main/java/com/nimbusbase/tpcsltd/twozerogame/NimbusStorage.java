@@ -1,4 +1,4 @@
-package com.tpcstld.twozerogame;
+package com.nimbusbase.tpcsltd.twozerogame;
 
 import android.content.ContentValues;
 import android.content.Context;

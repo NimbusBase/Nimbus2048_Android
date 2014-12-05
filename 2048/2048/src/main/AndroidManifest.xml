@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.tpcstld.twozerogame" >
+    package="com.nimbusbase.tpcstld.twozerogame" >
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/logo_2048"
+        android:icon="@drawable/logo_2048_nimbusbase"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".MainActivity"
+            android:name="com.nimbusbase.tpcsltd.twozerogame.MainActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" >
             <intent-filter>
@@ -34,7 +34,7 @@
         </activity>
         <activity android:name="com.box.boxandroidlibv2.activities.OAuthActivity" />
         <activity
-            android:name=".SyncOptionActivity"
+            android:name="com.nimbusbase.tpcsltd.twozerogame.SyncOptionActivity"
             android:label="@string/title_activity_sync_option" >
         </activity>
     </application>

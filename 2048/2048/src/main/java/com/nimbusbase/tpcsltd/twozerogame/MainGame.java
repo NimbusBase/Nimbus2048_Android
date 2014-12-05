@@ -1,8 +1,6 @@
-package com.tpcstld.twozerogame;
+package com.nimbusbase.tpcsltd.twozerogame;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 import java.util.ArrayList;
 import java.util.Collections;

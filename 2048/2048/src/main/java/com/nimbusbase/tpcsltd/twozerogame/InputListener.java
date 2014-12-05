@@ -1,9 +1,7 @@
-package com.tpcstld.twozerogame;
+package com.nimbusbase.tpcsltd.twozerogame;
 
-import android.content.Intent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 
 public class InputListener implements View.OnTouchListener {
 

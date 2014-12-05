@@ -1,4 +1,4 @@
-package com.tpcstld.twozerogame;
+package com.nimbusbase.tpcsltd.twozerogame;
 
 public class AnimationCell extends Cell {
     private int animationType;

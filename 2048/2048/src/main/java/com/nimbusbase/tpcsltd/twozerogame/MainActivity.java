@@ -1,4 +1,4 @@
-package com.tpcstld.twozerogame;
+package com.nimbusbase.tpcsltd.twozerogame;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -197,5 +197,6 @@ public class MainActivity extends ActionBarActivity {
         view.game.canUndo = settings.getBoolean(CAN_UNDO, view.game.canUndo);
         view.game.gameState = settings.getInt(GAME_STATE, view.game.gameState);
         view.game.lastGameState = settings.getInt(UNDO_GAME_STATE, view.game.lastGameState);
+        view.invalidate();
     }
 }
