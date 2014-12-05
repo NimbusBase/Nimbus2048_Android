@@ -83,7 +83,7 @@ public class MainActivity extends ActionBarActivity {
                 break;
             }
             for (int yy = 0; yy < view.game.grid.field[0].length; yy++) {
-                int value = settings.getInt(xx + " " + yy, -1);
+                int value = settings.getCoordinate(xx + " " + yy, -1);
                 if (value > 0 &&
                         (view.game.grid.field[xx][yy] == null ||
                                 value != view.game.grid.field[xx][yy].getValue())) {
@@ -94,7 +94,7 @@ public class MainActivity extends ActionBarActivity {
                     break;
                 }
 
-                int undoValue = settings.getInt(UNDO_GRID + xx + " " + yy, -1);
+                int undoValue = settings.getUndoCoordinate(UNDO_GRID + xx + " " + yy, -1);
                 if (undoValue > 0 &&
                         (view.game.grid.undoField[xx][yy] == null ||
                                 undoValue != view.game.grid.undoField[xx][yy].getValue())) {
@@ -107,22 +107,10 @@ public class MainActivity extends ActionBarActivity {
             }
         }
 
-        if (view.game.score != settings.getLong(SCORE, view.game.score)) {
+        if (view.game.score != settings.getLong(SCORE, 0)) {
             differentFromStorage = true;
         }
-        if (view.game.highScore != settings.getLong(HIGH_SCORE, view.game.highScore)) {
-            differentFromStorage = true;
-        };
-        if (view.game.lastScore != settings.getLong(UNDO_SCORE, view.game.lastScore)) {
-            differentFromStorage = true;
-        };
-        if (view.game.canUndo != settings.getBoolean(CAN_UNDO, view.game.canUndo)) {
-            differentFromStorage = true;
-        };
-        if (view.game.gameState != settings.getInt(GAME_STATE, view.game.gameState)) {
-            differentFromStorage = true;
-        };
-        if (view.game.lastGameState != settings.getInt(UNDO_GAME_STATE, view.game.lastGameState)) {
+        if (view.game.highScore != settings.getLong(HIGH_SCORE, 0)) {
             differentFromStorage = true;
         };
         if (!differentFromStorage) {
@@ -137,15 +125,15 @@ public class MainActivity extends ActionBarActivity {
         for (int xx = 0; xx < field.length; xx++) {
             for (int yy = 0; yy < field[0].length; yy++) {
                 if (field[xx][yy] != null) {
-                    editor.putInt(xx + " " + yy, field[xx][yy].getValue());
+                    editor.putCoordinate(xx + " " + yy, field[xx][yy].getValue());
                 } else {
-                    editor.putInt(xx + " " + yy, 0);
+                    editor.putCoordinate(xx + " " + yy, 0);
                 }
 
                 if (undoField[xx][yy] != null) {
-                    editor.putInt(UNDO_GRID + xx + " " + yy, undoField[xx][yy].getValue());
+                    editor.putUndoCoordinate(UNDO_GRID + xx + " " + yy, undoField[xx][yy].getValue());
                 } else {
-                    editor.putInt(UNDO_GRID + xx + " " + yy, 0);
+                    editor.putUndoCoordinate(UNDO_GRID + xx + " " + yy, 0);
                 }
             }
         }
@@ -175,14 +163,14 @@ public class MainActivity extends ActionBarActivity {
         //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         for (int xx = 0; xx < view.game.grid.field.length; xx++) {
             for (int yy = 0; yy < view.game.grid.field[0].length; yy++) {
-                int value = settings.getInt(xx + " " + yy, -1);
+                int value = settings.getCoordinate(xx + " " + yy, -1);
                 if (value > 0) {
                     view.game.grid.field[xx][yy] = new Tile(xx, yy, value);
                 } else if (value == 0) {
                     view.game.grid.field[xx][yy] = null;
                 }
 
-                int undoValue = settings.getInt(UNDO_GRID + xx + " " + yy, -1);
+                int undoValue = settings.getUndoCoordinate(UNDO_GRID + xx + " " + yy, -1);
                 if (undoValue > 0) {
                     view.game.grid.undoField[xx][yy] = new Tile(xx, yy, undoValue);
                 } else if (value == 0) {

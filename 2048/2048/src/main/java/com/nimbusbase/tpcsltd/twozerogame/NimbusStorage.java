@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class NimbusStorage extends SQLiteOpenHelper {
@@ -22,11 +24,15 @@ public class NimbusStorage extends SQLiteOpenHelper {
             // persistent type
             TYPE_INT = "int",
             TYPE_LONG = "long",
-            TYPE_BOOLEAN = "boolean";
+            TYPE_BOOLEAN = "boolean",
+            TYPE_STRING = "string";
 
     static final String SQL_CREATE = "CREATE TABLE "+ TABLE_NAME + " (" +
             FIELD_TYPE + " TEXT," + FIELD_NAME + " TEXT," + FIELD_VALUE + " TEXT," +
             "PRIMARY KEY(" + FIELD_TYPE + "," + FIELD_NAME + ")" +")";
+    static final String
+            COORDINATE = "COORDINATE",
+            UNDO_COORDINATE = "UNDO_COORDINATE";
 
     SQLiteDatabase readableDb;
     public NimbusStorage(Context context) {
@@ -62,6 +68,8 @@ public class NimbusStorage extends SQLiteOpenHelper {
                     return cursor.getLong(0);
                 } else if (TYPE_BOOLEAN.equals(type)) {
                     return cursor.getInt(0) > 0 ? true : false;
+                } else if (TYPE_STRING.equals(type)) {
+                    return cursor.getString(0);
                 } else {
                     return defaultValue;
                 }
@@ -84,14 +92,56 @@ public class NimbusStorage extends SQLiteOpenHelper {
     public Long getLong (String name, long defaultValue) {
         return (Long) get(TYPE_LONG, name, defaultValue);
     }
+    public Integer getCoordinate (String name, int defaultValue) {
+        String coordinateString = (String) get(TYPE_STRING, COORDINATE, "");
+        Map<String, Integer> coordinates = parseCoordinate(coordinateString);
+        Integer v = coordinates.get(name);
+        if (v == null) {
+            return defaultValue;
+        } else {
+            return v;
+        }
+    }
+    public Integer getUndoCoordinate (String name, int defaultValue) {
+        String coordinateString = (String) get(TYPE_STRING, UNDO_COORDINATE, "");
+        Map<String, Integer> coordinates = parseCoordinate(coordinateString);
+        Integer v = coordinates.get(name);
+        if (v == null) {
+            return defaultValue;
+        } else {
+            return v;
+        }
+    }
+    private Map<String, Integer> parseCoordinate (String coordinate) {
+        Map<String, Integer> result = new HashMap<String, Integer>();
+        if (coordinate != null) {
+            String[] coo = coordinate.split(",");
+            if (coo != null && coo.length > 0) {
+                for (String c : coo) {
+                    String[] pair = c.split(":");
+                    if (pair!=null&&pair.length==2) {
+                        result.put(pair[0], Integer.valueOf(pair[1]));
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
     class Editor {
         SQLiteDatabase db;
         Throwable error;
+        StringBuffer coordinate = new StringBuffer();
+        StringBuffer undoCoordinate = new StringBuffer();
+        boolean isFirstCoordinateAppended = false;
+        boolean isFirstUndoCoordinateAppended = false;
         private Editor (SQLiteDatabase db) {
             this.db = db;
             db.beginTransaction();
         }
         public void commit() {
+            put(TYPE_STRING, COORDINATE, coordinate.toString());
+            put(TYPE_STRING, UNDO_COORDINATE, undoCoordinate.toString());
             if (error == null) {
                 db.setTransactionSuccessful();
             }
@@ -112,6 +162,8 @@ public class NimbusStorage extends SQLiteOpenHelper {
                     values.put(FIELD_VALUE, (Long) value);
                 } else if(value instanceof Boolean) {
                     values.put(FIELD_VALUE, (Boolean) value);
+                } else if (value instanceof String) {
+                    values.put(FIELD_VALUE, (String) value);
                 }else {
                     throw new Exception("Unsupported persistent type:"+value.getClass().getName());
                 }
@@ -140,6 +192,23 @@ public class NimbusStorage extends SQLiteOpenHelper {
         }
         public void putLong (String name, Long value) {
             put(TYPE_LONG, name,value);
+        }
+
+        public void putCoordinate(String name, Integer value) {
+            if (!isFirstCoordinateAppended) {
+                isFirstCoordinateAppended = true;
+            } else {
+                coordinate.append(",");
+            }
+            coordinate.append(name + ":" + value);
+        }
+        public void putUndoCoordinate(String name, Integer value) {
+            if (!isFirstUndoCoordinateAppended) {
+                isFirstUndoCoordinateAppended = true;
+            } else {
+                undoCoordinate.append(",");
+            }
+            undoCoordinate.append(name + ":" + value);
         }
     }
 }
