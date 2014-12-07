@@ -37,16 +37,16 @@ public class Singleton {
                                     add(new HashMap<String, Object>() {{
                                             put(Config.CLOUD, Config.DROPBOX);
                                             put(Config.APP_NAME, appName);
-                                            put(Config.APP_ID, "x0e7vb4ls3lub5d");
-                                            put(Config.APP_SECRET, "jl1xp49sumwe7tf");
+                                            put(Config.APP_ID, "sz3df7p1dr9tq7g");
+                                            put(Config.APP_SECRET, "rwy8f452n0b16da");
                                             put(Config.AUTH_SCOPE, Config.AuthScope.APP_DATA);
                                         }}
                                     );
                                     add(new HashMap<String, Object>() {{
                                             put(Config.CLOUD, Config.BOX);
                                             put(Config.APP_NAME, appName);
-                                            put(Config.APP_ID, "eky66lnq5fnlmulhos7080u1c4a2isv2");
-                                            put(Config.APP_SECRET, "6bMkjEzGKU1ghcmXbCii32ykGHJp4xZT");
+                                            put(Config.APP_ID, "2xhcxhtuouujye1mjbc70c2h04mmnd9y");
+                                            put(Config.APP_SECRET, "ae3s2pAFqmYAVcZ8IGOwRvM57Whqd6Zm");
                                             put(Config.AUTH_SCOPE, Config.AuthScope.ROOT);
                                         }}
                                     );
