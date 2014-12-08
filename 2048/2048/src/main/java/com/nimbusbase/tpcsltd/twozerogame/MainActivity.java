@@ -14,7 +14,7 @@ public class MainActivity extends ActionBarActivity {
     public static final String WIDTH = "width";
     public static final String HEIGHT = "height";
     public static final String SCORE = "score";
-    public static final String HIGH_SCORE = "high score";
+    public static final String HIGH_SCORE = "high score temp";
     public static final String UNDO_SCORE = "undo score";
     public static final String CAN_UNDO = "can undo";
     public static final String UNDO_GRID = "undo";
@@ -161,15 +161,6 @@ public class MainActivity extends ActionBarActivity {
     private void load() {
         //Stopping all animations
         view.game.aGrid.cancelAnimations();
-        // update main game's high score
-        long newestHighScore = view.game.getHighScore();
-        if (newestHighScore >= view.game.highScore) {
-            // remote score is higher
-            view.game.highScore = newestHighScore;
-        } else {
-            // local score is higher, overwrite
-            view.game.recordHighScore();
-        }
         NimbusStorage settings = new NimbusStorage(this);
         NimbusStorage.CoordinateReader coordinateReader = settings.coordinateReader();
         //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
