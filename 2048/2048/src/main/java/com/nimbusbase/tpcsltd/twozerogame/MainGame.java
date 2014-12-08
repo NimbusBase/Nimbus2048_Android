@@ -113,7 +113,7 @@ public class MainGame {
         settings.close();
     }
 
-    private long getHighScore() {
+    public long getHighScore() {
         //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
         NimbusStorage settings = new NimbusStorage(mContext);
         long highScore = settings.getLong(HIGH_SCORE, 0);

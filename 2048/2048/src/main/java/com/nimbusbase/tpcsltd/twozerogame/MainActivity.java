@@ -163,6 +163,11 @@ public class MainActivity extends ActionBarActivity {
         view.game.aGrid.cancelAnimations();
         NimbusStorage settings = new NimbusStorage(this);
         NimbusStorage.CoordinateReader coordinateReader = settings.coordinateReader();
+        // update high score
+        long highScoreInStorage = view.game.getHighScore();
+        if (highScoreInStorage > view.game.highScore) {
+            view.game.highScore = highScoreInStorage;
+        }
         //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         for (int xx = 0; xx < view.game.grid.field.length; xx++) {
             for (int yy = 0; yy < view.game.grid.field[0].length; yy++) {
