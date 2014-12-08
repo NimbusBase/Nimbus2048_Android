@@ -110,12 +110,15 @@ public class MainGame {
         NimbusStorage.Editor editor = settings.edit();
         editor.putLong(HIGH_SCORE, highScore);
         editor.commit();
+        settings.close();
     }
 
     private long getHighScore() {
         //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
         NimbusStorage settings = new NimbusStorage(mContext);
-        return settings.getLong(HIGH_SCORE, 0);
+        long highScore = settings.getLong(HIGH_SCORE, 0);
+        settings.close();
+        return highScore;
     }
 
     private void prepareTiles() {

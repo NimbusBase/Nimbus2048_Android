@@ -35,6 +35,7 @@ public class NimbusStorage extends SQLiteOpenHelper {
             UNDO_COORDINATE = "UNDO_COORDINATE";
 
     SQLiteDatabase readableDb;
+
     public NimbusStorage(Context context) {
         super(context, NAME, null, VERSION);
         this.readableDb = this.getReadableDatabase();
@@ -54,7 +55,11 @@ public class NimbusStorage extends SQLiteOpenHelper {
         return new Editor(this.getWritableDatabase());
     }
 
-    public Object get(String type, String name, Object defaultValue) {
+    public CoordinateReader coordinateReader() {
+        return new CoordinateReader();
+    }
+
+    private Object get(String type, String name, Object defaultValue) {
         Cursor cursor = readableDb.query(TABLE_NAME, new String[]{FIELD_VALUE},
                 FIELD_TYPE + "=? AND " + FIELD_NAME + "=?",
                 new String[]{type, name}, null, null, null);
@@ -92,40 +97,9 @@ public class NimbusStorage extends SQLiteOpenHelper {
     public Long getLong (String name, long defaultValue) {
         return (Long) get(TYPE_LONG, name, defaultValue);
     }
-    public Integer getCoordinate (String name, int defaultValue) {
-        String coordinateString = (String) get(TYPE_STRING, COORDINATE, "");
-        Map<String, Integer> coordinates = parseCoordinate(coordinateString);
-        Integer v = coordinates.get(name);
-        if (v == null) {
-            return defaultValue;
-        } else {
-            return v;
-        }
-    }
-    public Integer getUndoCoordinate (String name, int defaultValue) {
-        String coordinateString = (String) get(TYPE_STRING, UNDO_COORDINATE, "");
-        Map<String, Integer> coordinates = parseCoordinate(coordinateString);
-        Integer v = coordinates.get(name);
-        if (v == null) {
-            return defaultValue;
-        } else {
-            return v;
-        }
-    }
-    private Map<String, Integer> parseCoordinate (String coordinate) {
-        Map<String, Integer> result = new HashMap<String, Integer>();
-        if (coordinate != null) {
-            String[] coo = coordinate.split(",");
-            if (coo != null && coo.length > 0) {
-                for (String c : coo) {
-                    String[] pair = c.split(":");
-                    if (pair!=null&&pair.length==2) {
-                        result.put(pair[0], Integer.valueOf(pair[1]));
-                    }
-                }
-            }
-        }
-        return result;
+
+    public void close() {
+        this.readableDb.close();
     }
 
     class Editor {
@@ -209,6 +183,51 @@ public class NimbusStorage extends SQLiteOpenHelper {
                 undoCoordinate.append(",");
             }
             undoCoordinate.append(name + ":" + value);
+        }
+    }
+
+    class CoordinateReader {
+        Map<String, Integer> coordinates;
+        Map<String, Integer> undoCoordinates;
+        private CoordinateReader() {
+            String coordinateString = (String) get(TYPE_STRING, COORDINATE, "");
+            coordinates = parseCoordinate(coordinateString);
+            String undoCoordinateString = (String) get(TYPE_STRING, UNDO_COORDINATE, "");
+            undoCoordinates = parseCoordinate(undoCoordinateString);
+        }
+
+        public Integer getCoordinate (String name, int defaultValue) {
+            Integer v = coordinates.get(name);
+            if (v == null) {
+                return defaultValue;
+            } else {
+                return v;
+            }
+        }
+
+        public Integer getUndoCoordinate (String name, int defaultValue) {
+            Integer v = undoCoordinates.get(name);
+            if (v == null) {
+                return defaultValue;
+            } else {
+                return v;
+            }
+        }
+
+        private Map<String, Integer> parseCoordinate (String coordinate) {
+            Map<String, Integer> result = new HashMap<String, Integer>();
+            if (coordinate != null) {
+                String[] coo = coordinate.split(",");
+                if (coo != null && coo.length > 0) {
+                    for (String c : coo) {
+                        String[] pair = c.split(":");
+                        if (pair!=null&&pair.length==2) {
+                            result.put(pair[0], Integer.valueOf(pair[1]));
+                        }
+                    }
+                }
+            }
+            return result;
         }
     }
 }

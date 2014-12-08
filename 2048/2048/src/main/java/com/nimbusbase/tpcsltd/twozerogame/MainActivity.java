@@ -76,6 +76,7 @@ public class MainActivity extends ActionBarActivity {
         //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         //SharedPreferences.Editor editor = settings.edit();
         NimbusStorage settings = new NimbusStorage(this);
+        NimbusStorage.CoordinateReader coordinateReader = settings.coordinateReader();
         // Check whether data changed
         boolean differentFromStorage = false;
         for (int xx = 0; xx < view.game.grid.field.length; xx++) {
@@ -83,7 +84,7 @@ public class MainActivity extends ActionBarActivity {
                 break;
             }
             for (int yy = 0; yy < view.game.grid.field[0].length; yy++) {
-                int value = settings.getCoordinate(xx + " " + yy, -1);
+                int value = coordinateReader.getCoordinate(xx + " " + yy, -1);
                 if (value > 0 &&
                         (view.game.grid.field[xx][yy] == null ||
                                 value != view.game.grid.field[xx][yy].getValue())) {
@@ -94,7 +95,7 @@ public class MainActivity extends ActionBarActivity {
                     break;
                 }
 
-                int undoValue = settings.getUndoCoordinate(UNDO_GRID + xx + " " + yy, -1);
+                int undoValue = coordinateReader.getUndoCoordinate(UNDO_GRID + xx + " " + yy, -1);
                 if (undoValue > 0 &&
                         (view.game.grid.undoField[xx][yy] == null ||
                                 undoValue != view.game.grid.undoField[xx][yy].getValue())) {
@@ -144,6 +145,7 @@ public class MainActivity extends ActionBarActivity {
         editor.putInt(GAME_STATE, view.game.gameState);
         editor.putInt(UNDO_GAME_STATE, view.game.lastGameState);
         editor.commit();
+        settings.close();
     }
 
     protected void onResume() {
@@ -160,17 +162,18 @@ public class MainActivity extends ActionBarActivity {
         //Stopping all animations
         view.game.aGrid.cancelAnimations();
         NimbusStorage settings = new NimbusStorage(this);
+        NimbusStorage.CoordinateReader coordinateReader = settings.coordinateReader();
         //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         for (int xx = 0; xx < view.game.grid.field.length; xx++) {
             for (int yy = 0; yy < view.game.grid.field[0].length; yy++) {
-                int value = settings.getCoordinate(xx + " " + yy, -1);
+                int value = coordinateReader.getCoordinate(xx + " " + yy, -1);
                 if (value > 0) {
                     view.game.grid.field[xx][yy] = new Tile(xx, yy, value);
                 } else if (value == 0) {
                     view.game.grid.field[xx][yy] = null;
                 }
 
-                int undoValue = settings.getUndoCoordinate(UNDO_GRID + xx + " " + yy, -1);
+                int undoValue = coordinateReader.getUndoCoordinate(UNDO_GRID + xx + " " + yy, -1);
                 if (undoValue > 0) {
                     view.game.grid.undoField[xx][yy] = new Tile(xx, yy, undoValue);
                 } else if (value == 0) {
@@ -186,5 +189,6 @@ public class MainActivity extends ActionBarActivity {
         view.game.gameState = settings.getInt(GAME_STATE, view.game.gameState);
         view.game.lastGameState = settings.getInt(UNDO_GAME_STATE, view.game.lastGameState);
         view.invalidate();
+        settings.close();
     }
 }
