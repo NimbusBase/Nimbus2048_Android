@@ -103,7 +103,7 @@ public class MainGame {
                 SPAWN_ANIMATION_TIME, MOVE_ANIMATION_TIME, null); //Direction: -1 = EXPANDING
     }
 
-    private void recordHighScore() {
+    public void recordHighScore() {
         //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
         //SharedPreferences.Editor editor = settings.edit();
         NimbusStorage settings = new NimbusStorage(mContext);
@@ -113,7 +113,7 @@ public class MainGame {
         settings.close();
     }
 
-    private long getHighScore() {
+    public long getHighScore() {
         //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
         NimbusStorage settings = new NimbusStorage(mContext);
         long highScore = settings.getLong(HIGH_SCORE, 0);
