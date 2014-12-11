@@ -1,9 +1,12 @@
 package com.nimbusbase.tpcsltd.twozerogame;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import com.nimbusbase.nimbusbase.Base;
 import com.nimbusbase.nimbusbase.Constant.Config;
+import com.nimbusbase.nimbusbase.Server;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +17,16 @@ import java.util.Map;
  */
 public class Singleton {
     public static Context CONTEXT;
+
+    public static String getDefaultServer() {
+        return PreferenceManager.getDefaultSharedPreferences(CONTEXT).getString("defaultServer","");
+    }
+
+    public static void setDefaultServer(String defaultServer) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(CONTEXT).edit();
+        editor.putString("defaultServer", defaultServer);
+        editor.commit();
+    }
 
     public static Base base() {
         return SingletonHolder.sBaseInstance;

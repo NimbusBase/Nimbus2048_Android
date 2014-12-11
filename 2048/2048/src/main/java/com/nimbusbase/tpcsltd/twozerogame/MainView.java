@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.view.View;
 
 import com.nimbusbase.tpcstld.twozerogame.R;
@@ -60,7 +61,9 @@ public class MainView extends View {
     public int sYIcons;
     public int sXNewGame;
     public int sXUndo;
+    public int sXSetting;
     public int sXSync;
+    public int sXAuto;
     public int iconSize;
 
     //Timing
@@ -81,6 +84,26 @@ public class MainView extends View {
     static final int BASE_ANIMATION_TIME = 100000000;
     static final float MERGING_ACCELERATION = (float) -0.5;
     static final float INITIAL_VELOCITY = (1 - MERGING_ACCELERATION) / 4;
+
+    //Sync button
+    int syncRotateDegree = 0;
+    int syncRotateSpeed = 10;
+    int syncPercentage;
+    final int FRAME_RATE = 30;
+    boolean isSyncing = false;
+    Handler h = new Handler();
+    private Runnable r = new Runnable() {
+        @Override
+        public void run() {
+            if (isSyncing) {
+                invalidate();
+            }
+        }
+    };
+
+    //Auto sync button
+    boolean isAutoSyncOn = false;
+    int secondsRemain = 60;
 
     @Override
     public void onDraw(Canvas canvas) {
@@ -112,6 +135,12 @@ public class MainView extends View {
         } else if (!game.isActive() && refreshLastTime) {
             invalidate();
             refreshLastTime = false;
+        }
+        drawSyncButton(canvas);
+        drawAutoButton(canvas);
+        if (isSyncing) {
+            h.postDelayed(r, FRAME_RATE);
+            drawSyncProcess(canvas);
         }
     }
 
@@ -181,6 +210,24 @@ public class MainView extends View {
         canvas.drawText(String.valueOf(game.score), sXScore + textMiddleScore, bodyStartYAll, paint);
     }
 
+    private void drawSyncProcess(Canvas canvas) {
+        paint.setTextSize(bodyTextSize);
+        paint.setTextAlign(Paint.Align.CENTER);
+
+        int bodyWidthPercentage = (int) (paint.measureText("" + syncPercentage));
+        int textWidthPercentage = bodyWidthPercentage + textPaddingSize * 2;
+        int textMiddlePercentage = textWidthPercentage / 2;
+
+        int textShiftY = centerText() * 2;
+        int syncProcessStartY = sYIcons - textShiftY + 3*iconPaddingSize/2;
+
+        int sXPercentage = sXSync - iconSize * 3 / 2 - iconPaddingSize + textMiddlePercentage;
+
+
+        paint.setColor(getResources().getColor(R.color.text_black));
+        canvas.drawText(String.valueOf(syncPercentage)+"%", sXPercentage, syncProcessStartY, paint);
+    }
+
     private void drawNewGameButton(Canvas canvas, boolean lightUp) {
 
         if (lightUp) {
@@ -201,7 +248,7 @@ public class MainView extends View {
         }
 
         drawDrawable(canvas,
-                getResources().getDrawable(R.drawable.ic_action_refresh),
+                getResources().getDrawable(R.drawable.ic_action_start),
                 sXNewGame + iconPaddingSize,
                 sYIcons + iconPaddingSize,
                 sXNewGame + iconSize - iconPaddingSize,
@@ -227,22 +274,78 @@ public class MainView extends View {
         );
     }
 
-    private void drawSyncButton(Canvas canvas) {
+    private void drawSettingButton(Canvas canvas) {
 
         drawDrawable(canvas,
                 backgroundRectangle,
-                sXSync,
-                sYIcons, sXSync + iconSize,
+                sXSetting,
+                sYIcons, sXSetting + iconSize,
                 sYIcons + iconSize
         );
 
         drawDrawable(canvas,
                 getResources().getDrawable(R.drawable.ic_action_settings),
+                sXSetting + iconPaddingSize,
+                sYIcons + iconPaddingSize,
+                sXSetting + iconSize - iconPaddingSize,
+                sYIcons + iconSize - iconPaddingSize
+        );
+    }
+
+    private void drawSyncButton(Canvas canvas) {
+        drawDrawable(canvas,
+                backgroundRectangle,
+                sXSync,
+                sYIcons,
+                sXSync + iconSize,
+                sYIcons + iconSize
+        );
+        canvas.save();
+        syncRotateDegree = isSyncing?(syncRotateDegree + syncRotateSpeed) % 360:0;
+        canvas.rotate(syncRotateDegree, sXSync+iconSize/2, sYIcons+iconSize/2);
+        drawDrawable(canvas,
+                getResources().getDrawable(R.drawable.ic_action_refresh),
                 sXSync + iconPaddingSize,
                 sYIcons + iconPaddingSize,
                 sXSync + iconSize - iconPaddingSize,
                 sYIcons + iconSize - iconPaddingSize
         );
+        canvas.restore();
+    }
+
+    private void drawAutoButton(Canvas canvas) {
+        Drawable bg = isAutoSyncOn?lightUpRectangle:backgroundRectangle;
+        drawDrawable(canvas,
+                bg,
+                sXAuto,
+                sYIcons, sXAuto + iconSize,
+                sYIcons + iconSize
+        );
+        if (isAutoSyncOn){
+            paint.setTextSize(bodyTextSize);
+            paint.setTextAlign(Paint.Align.CENTER);
+
+            int bodyWidthSeconds = (int) (paint.measureText("" + secondsRemain));
+            int textWidthSeconds = bodyWidthSeconds + textPaddingSize;
+            int textMiddleSeconds = textWidthSeconds / 2;
+
+            int textShiftY = centerText() * 2;
+            int syncProcessStartY = sYIcons - textShiftY + 3*iconPaddingSize/2;
+
+            int sXSeconds = startingX + textMiddleSeconds;
+
+
+            paint.setColor(getResources().getColor(R.color.text_white));
+            canvas.drawText(String.valueOf(secondsRemain), sXSeconds, syncProcessStartY, paint);
+        } else {
+            drawDrawable(canvas,
+                    getResources().getDrawable(R.drawable.ic_action_auto),
+                    sXAuto + iconPaddingSize,
+                    sYIcons + iconPaddingSize,
+                    sXAuto + iconSize - iconPaddingSize,
+                    sYIcons + iconSize - iconPaddingSize
+            );
+        }
     }
 
     private void drawHeader(Canvas canvas) {
@@ -288,6 +391,7 @@ public class MainView extends View {
     }
 
     private void drawCells(Canvas canvas) {
+        //drawSyncButton(canvas);
         paint.setTextSize(textSize);
         paint.setTextAlign(Paint.Align.CENTER);
         // Outputting the individual cells
@@ -434,7 +538,8 @@ public class MainView extends View {
         drawHeader(canvas);
         drawNewGameButton(canvas, false);
         drawUndoButton(canvas);
-        drawSyncButton(canvas);
+        drawSettingButton(canvas);
+        //drawSyncButton(canvas);
         drawBackground(canvas);
         drawBackgroundGrid(canvas);
         drawInstructions(canvas);
@@ -558,7 +663,9 @@ public class MainView extends View {
         sYIcons = (startingY + eYAll) / 2 - iconSize / 2;
         sXNewGame = (endingX - iconSize);
         sXUndo = sXNewGame - iconSize * 3 / 2 - iconPaddingSize;
-        sXSync = sXUndo - iconSize * 3 / 2 - iconPaddingSize;
+        sXSetting = sXUndo - iconSize * 3 / 2 - iconPaddingSize;
+        sXSync = sXSetting - iconSize * 3 / 2 - iconPaddingSize;
+        sXAuto = startingX;
         resyncTime();
     }
 
@@ -587,6 +694,7 @@ public class MainView extends View {
         }
         setOnTouchListener(new InputListener(this));
         game.newGame();
+
     }
 
     public void setMainActivity(MainActivity activity) {

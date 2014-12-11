@@ -72,7 +72,7 @@ public class MainActivity extends ActionBarActivity {
         save();
     }
 
-    private void save() {
+    public void save() {
         //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         //SharedPreferences.Editor editor = settings.edit();
         NimbusStorage settings = new NimbusStorage(this);
@@ -158,7 +158,7 @@ public class MainActivity extends ActionBarActivity {
         startActivity(intent);
     }
 
-    private void load() {
+    public void load() {
         //Stopping all animations
         view.game.aGrid.cancelAnimations();
         NimbusStorage settings = new NimbusStorage(this);

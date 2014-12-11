@@ -2,6 +2,15 @@ package com.nimbusbase.tpcsltd.twozerogame;
 
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
+import android.widget.Toast;
+
+import com.nimbusbase.nimbusbase.Server;
+import com.nimbusbase.nimbusbase.promise.Callback;
+import com.nimbusbase.nimbusbase.promise.NMBError;
+import com.nimbusbase.nimbusbase.promise.Promise;
+import com.nimbusbase.nimbusbase.promise.Response;
 
 public class InputListener implements View.OnTouchListener {
 
@@ -116,10 +125,46 @@ public class InputListener implements View.OnTouchListener {
                         mView.game.newGame();
                     } else if (iconPressed(mView.sXUndo, mView.sYIcons)) {
                         mView.game.revertUndoState();
-                    } else if (iconPressed(mView.sXSync, mView.sYIcons)) {
+                    } else if (iconPressed(mView.sXSetting, mView.sYIcons)) {
                         // new view for sync setting
                         mView.getMainActivity().startSyncOptionActivity();
-                    } else if (isTap(2) && inRange(mView.startingX, x, mView.endingX)
+                    } else if (iconPressed(mView.sXSync, mView.sYIcons)) {
+                        String cloudName = Singleton.getDefaultServer();
+                        if (!"".equals(cloudName)) {
+                            Server defaultServer = null;
+                            for (Server server : Singleton.base().getServers()) {
+                                if (server.getCloud().equals(cloudName)&&server.isInitialized()) {
+                                    defaultServer = server;
+                                    break;
+                                }
+                            }
+                            if (defaultServer != null) {
+                                startSync(defaultServer);
+                            }
+                        }
+                    } else if (iconPressed(mView.sXAuto, mView.sYIcons)){
+                        if (mView.isAutoSyncOn) {
+                            mView.isAutoSyncOn = false;
+                            //
+                        } else {
+                            String cloudName = Singleton.getDefaultServer();
+                            if (!"".equals(cloudName)) {
+                                Server defaultServer = null;
+                                for (Server server : Singleton.base().getServers()) {
+                                    if (server.getCloud().equals(cloudName) && server.isInitialized()) {
+                                        defaultServer = server;
+                                        break;
+                                    }
+                                }
+                                if (defaultServer != null) {
+                                    mView.isAutoSyncOn = true;
+                                    //start timer
+                                    startTimer(defaultServer);
+                                }
+                            }
+                        }
+                        mView.invalidate();
+                    }else if (isTap(2) && inRange(mView.startingX, x, mView.endingX)
                         && inRange(mView.startingY, x, mView.endingY) && mView.continueButtonEnabled) {
                         mView.game.setEndlessMode();
                     }
@@ -127,7 +172,71 @@ public class InputListener implements View.OnTouchListener {
         }
         return true;
     }
-
+    public void startSync(final Server defaultServer) {
+        if (defaultServer.isSynchronizing()) {
+            defaultServer.getRunningSync().cancel();
+        } else if (defaultServer.canSynchronize()) {
+            mView.getMainActivity().save();
+            mView.syncPercentage = 0;
+            mView.isSyncing = true;
+            final Promise
+                    promise = defaultServer.synchronize(null);
+            promise
+                    .onProgress(new Callback.ProgressListener() {
+                        @Override
+                        public void onProgress(double v) {
+                            mView.syncPercentage = (int)Math.ceil(v*100);
+                            mView.invalidate();
+                        }
+                    })
+                    .onAlways(new Callback.AlwaysListener() {
+                        @Override
+                        public void onAlways(Response response) {
+                            mView.isSyncing = false;
+                            if (!response.isSuccess()) {
+                                final NMBError
+                                        error = response.error;
+                                if (error != null)
+                                    Toast.makeText(mView.getMainActivity(), error.toString(), Toast.LENGTH_LONG).show();
+                            } else {
+                                Toast.makeText(mView.getMainActivity(), "Sync is successful", Toast.LENGTH_LONG).show();
+                            }
+                            mView.getMainActivity().load();
+                            if (mView.isAutoSyncOn) {
+                                startTimer(defaultServer);
+                            }
+                        }
+                    });
+            mView.invalidate();
+        }
+    }
+    private class TimerForSync extends Thread {
+        Server server;
+        public TimerForSync(Server defaultServer) {
+            server = defaultServer;
+        }
+        @Override
+        public void run() {
+            if (mView.isAutoSyncOn) {
+                if (!mView.isSyncing) {
+                    mView.secondsRemain--;
+                }
+                if (mView.secondsRemain >= 1) {
+                    mView.h.postDelayed(this, 1000);
+                } else {
+                    //start sync & reset timer
+                    mView.secondsRemain = 60;
+                    startSync(server);
+                }
+            }
+            mView.invalidate();
+        }
+    };
+    public void startTimer(Server defaultServer) {
+        mView.secondsRemain = 60;
+        mView.secondsRemain = 60;
+        mView.h.postDelayed(new TimerForSync(defaultServer), 1000);
+    }
     private float pathMoved() {
         return (x - startingX) * (x - startingX) + (y - startingY) * (y - startingY);
     }

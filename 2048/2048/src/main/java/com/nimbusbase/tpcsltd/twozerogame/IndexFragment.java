@@ -167,6 +167,16 @@ public class IndexFragment extends PreferenceFragment {
     protected void onServerItemClick(ListItemServer item) {
         final Server
                 server = item.getServer();
+        String defaultServer = Singleton.getDefaultServer();
+        if (defaultServer.equals(server.getCloud())) {
+            Singleton.setDefaultServer(null);
+        } else if (server.isInitialized()) {
+            Singleton.setDefaultServer(server.getCloud());
+        }
+        setPreferenceScreen(null);
+        initiatePreferenceScreen(getBase(), R.xml.fragment_index);
+        /*final Server
+                server = item.getServer();
         if (server.isSynchronizing()) {
             server.getRunningSync().cancel();
         }
@@ -174,7 +184,7 @@ public class IndexFragment extends PreferenceFragment {
             final int
                     index = Arrays.asList(getBase().getServers()).indexOf(server);
             startSyncOnServer(server, index);
-        }
+        }*/
     }
 
     protected void onServerItemStateChange(ListItemServer item, Boolean newValue) {
