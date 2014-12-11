@@ -318,22 +318,24 @@ public class MainView extends View {
         drawDrawable(canvas,
                 bg,
                 sXAuto,
-                sYIcons, sXAuto + iconSize,
+                sYIcons,
+                sXAuto + iconSize,
                 sYIcons + iconSize
         );
         if (isAutoSyncOn){
             paint.setTextSize(bodyTextSize);
             paint.setTextAlign(Paint.Align.CENTER);
 
-            int bodyWidthSeconds = (int) (paint.measureText("" + secondsRemain));
-            int textWidthSeconds = bodyWidthSeconds + textPaddingSize;
-            int textMiddleSeconds = textWidthSeconds / 2;
+//            int bodyWidthSeconds = (int) (paint.measureText("" + secondsRemain));
+//            int textWidthSeconds = bodyWidthSeconds + textPaddingSize;
+//            int textMiddleSeconds = textWidthSeconds / 2;
+//
+//            int textShiftY = centerText() * 2;
+//            int syncProcessStartY = sYIcons - textShiftY + 3*iconPaddingSize/2;
 
-            int textShiftY = centerText() * 2;
-            int syncProcessStartY = sYIcons - textShiftY + 3*iconPaddingSize/2;
-
-            int sXSeconds = startingX + textMiddleSeconds;
-
+//            int sXSeconds = startingX + textMiddleSeconds;
+            int sXSeconds = sXAuto + iconSize/2;
+            int syncProcessStartY = (int) (sYIcons + (iconSize / 2) - ((paint.descent() + paint.ascent()) / 2)) ;
 
             paint.setColor(getResources().getColor(R.color.text_white));
             canvas.drawText(String.valueOf(secondsRemain), sXSeconds, syncProcessStartY, paint);
