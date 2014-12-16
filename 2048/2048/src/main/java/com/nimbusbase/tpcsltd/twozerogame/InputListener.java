@@ -1,5 +1,6 @@
 package com.nimbusbase.tpcsltd.twozerogame;
 
+import android.os.AsyncTask;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
@@ -11,6 +12,8 @@ import com.nimbusbase.nimbusbase.promise.Callback;
 import com.nimbusbase.nimbusbase.promise.NMBError;
 import com.nimbusbase.nimbusbase.promise.Promise;
 import com.nimbusbase.nimbusbase.promise.Response;
+
+import java.util.Objects;
 
 public class InputListener implements View.OnTouchListener {
 
@@ -207,33 +210,41 @@ public class InputListener implements View.OnTouchListener {
             mView.isSyncing = true;
             final Promise
                     promise = defaultServer.synchronize(null);
-            promise
-                    .onProgress(new Callback.ProgressListener() {
-                        @Override
-                        public void onProgress(double v) {
-                            mView.syncPercentage = (int)Math.ceil(v*100);
-                            mView.invalidate();
-                        }
-                    })
-                    .onAlways(new Callback.AlwaysListener() {
-                        @Override
-                        public void onAlways(Response response) {
-                            mView.getMainActivity().screenLocked = false;
-                            mView.isSyncing = false;
-                            if (!response.isSuccess()) {
-                                final NMBError
-                                        error = response.error;
-                                if (error != null)
-                                    Toast.makeText(mView.getMainActivity(), error.toString(), Toast.LENGTH_LONG).show();
-                            } else {
-                                Toast.makeText(mView.getMainActivity(), "Sync is successful", Toast.LENGTH_LONG).show();
-                            }
-                            mView.getMainActivity().load();
-                            if (mView.isAutoSyncOn) {
-                                startTimer(defaultServer);
-                            }
-                        }
-                    });
+            AsyncTask syncTask = new AsyncTask<Object, Object, Object>() {
+
+                @Override
+                protected Object doInBackground(Object... params) {
+                    promise
+                            .onProgress(new Callback.ProgressListener() {
+                                @Override
+                                public void onProgress(double v) {
+                                    mView.syncPercentage = (int)Math.ceil(v*100);
+                                    mView.invalidate();
+                                }
+                            })
+                            .onAlways(new Callback.AlwaysListener() {
+                                @Override
+                                public void onAlways(Response response) {
+                                    mView.getMainActivity().screenLocked = false;
+                                    mView.isSyncing = false;
+                                    if (!response.isSuccess()) {
+                                        final NMBError
+                                                error = response.error;
+                                        if (error != null)
+                                            Toast.makeText(mView.getMainActivity(), error.toString(), Toast.LENGTH_LONG).show();
+                                    } else {
+                                        Toast.makeText(mView.getMainActivity(), "Sync is successful", Toast.LENGTH_LONG).show();
+                                    }
+                                    mView.getMainActivity().load();
+                                    if (mView.isAutoSyncOn) {
+                                        startTimer(defaultServer);
+                                    }
+                                }
+                            });
+                    return null;
+                }
+            };
+            syncTask.execute();
             mView.invalidate();
         }
     }

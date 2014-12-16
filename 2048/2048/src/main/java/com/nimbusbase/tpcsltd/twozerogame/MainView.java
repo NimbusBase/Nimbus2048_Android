@@ -89,7 +89,7 @@ public class MainView extends View {
     int syncRotateDegree = 0;
     int syncRotateSpeed = 10;
     int syncPercentage;
-    final int FRAME_RATE = 30;
+    final int FRAME_RATE = 200;
     boolean isSyncing = false;
     Handler h = new Handler();
     private Runnable r = new Runnable() {
