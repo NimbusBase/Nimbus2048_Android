@@ -54,7 +54,7 @@ public class NimbusStorage extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        
+
     }
 
     public List<Snapshot> getSnapshots () {

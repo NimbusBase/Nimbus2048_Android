@@ -181,6 +181,10 @@ public class InputListener implements View.OnTouchListener {
                                             "Please select a default server first",
                                             Toast.LENGTH_LONG).show();
                                 }
+                            } else {
+                                Toast.makeText(mView.getMainActivity(),
+                                        "Please select a default server first",
+                                        Toast.LENGTH_LONG).show();
                             }
                         }
                         mView.invalidate();
