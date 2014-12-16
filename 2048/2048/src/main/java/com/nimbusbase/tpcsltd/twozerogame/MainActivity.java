@@ -113,7 +113,7 @@ public class MainActivity extends ActionBarActivity {
         newSnapshot.setState(view.game.gameState);
 
         // only save if current data is different from the storage
-        if (!newSnapshot.equals(snapshotInStorage)) {
+        if (snapshotInStorage!=null && !newSnapshot.equals(snapshotInStorage)) {
             if (view.game.canUndo) {
                 undoSnapshot.create();
             }
