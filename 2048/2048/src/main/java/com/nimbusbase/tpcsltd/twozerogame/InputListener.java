@@ -39,6 +39,10 @@ public class InputListener implements View.OnTouchListener {
     }
 
     public boolean onTouch(View view, MotionEvent event) {
+        if (mView.getMainActivity().screenLocked) {
+            Toast.makeText(mView.getMainActivity(), "Screen is locked during sync.", Toast.LENGTH_LONG).show();
+            return true;
+        }
         switch (event.getAction()) {
 
             case MotionEvent.ACTION_DOWN:
@@ -127,7 +131,11 @@ public class InputListener implements View.OnTouchListener {
                         mView.game.revertUndoState();
                     } else if (iconPressed(mView.sXSetting, mView.sYIcons)) {
                         // new view for sync setting
-                        mView.getMainActivity().startSyncOptionActivity();
+                        if (!mView.isAutoSyncOn) {
+                            mView.getMainActivity().startSyncOptionActivity();
+                        } else {
+                            Toast.makeText(mView.getMainActivity(), "Please turn off the AUTO SYNC first.", Toast.LENGTH_LONG).show();
+                        }
                     } else if (iconPressed(mView.sXSync, mView.sYIcons)) {
                         String cloudName = Singleton.getDefaultServer();
                         if (!"".equals(cloudName)) {
@@ -140,7 +148,15 @@ public class InputListener implements View.OnTouchListener {
                             }
                             if (defaultServer != null) {
                                 startSync(defaultServer);
+                            } else {
+                                Toast.makeText(mView.getMainActivity(),
+                                        "Please select a default server first",
+                                        Toast.LENGTH_LONG).show();
                             }
+                        } else {
+                            Toast.makeText(mView.getMainActivity(),
+                                    "Please select a default server first",
+                                    Toast.LENGTH_LONG).show();
                         }
                     } else if (iconPressed(mView.sXAuto, mView.sYIcons)){
                         if (mView.isAutoSyncOn) {
@@ -160,6 +176,10 @@ public class InputListener implements View.OnTouchListener {
                                     mView.isAutoSyncOn = true;
                                     //start timer
                                     startTimer(defaultServer);
+                                } else {
+                                    Toast.makeText(mView.getMainActivity(),
+                                            "Please select a default server first",
+                                            Toast.LENGTH_LONG).show();
                                 }
                             }
                         }
@@ -172,7 +192,9 @@ public class InputListener implements View.OnTouchListener {
         }
         return true;
     }
+
     public void startSync(final Server defaultServer) {
+        mView.getMainActivity().screenLocked = true;
         if (defaultServer.isSynchronizing()) {
             defaultServer.getRunningSync().cancel();
         } else if (defaultServer.canSynchronize()) {
@@ -192,6 +214,7 @@ public class InputListener implements View.OnTouchListener {
                     .onAlways(new Callback.AlwaysListener() {
                         @Override
                         public void onAlways(Response response) {
+                            mView.getMainActivity().screenLocked = false;
                             mView.isSyncing = false;
                             if (!response.isSuccess()) {
                                 final NMBError
@@ -210,6 +233,7 @@ public class InputListener implements View.OnTouchListener {
             mView.invalidate();
         }
     }
+
     private class TimerForSync extends Thread {
         Server server;
         public TimerForSync(Server defaultServer) {
@@ -220,10 +244,9 @@ public class InputListener implements View.OnTouchListener {
             if (mView.isAutoSyncOn) {
                 if (!mView.isSyncing) {
                     mView.secondsRemain--;
-                }
-                if (mView.secondsRemain >= 1) {
                     mView.h.postDelayed(this, 1000);
-                } else {
+                }
+                if (mView.secondsRemain < 1) {
                     //start sync & reset timer
                     mView.secondsRemain = 60;
                     startSync(server);
@@ -232,11 +255,13 @@ public class InputListener implements View.OnTouchListener {
             mView.invalidate();
         }
     };
+
     public void startTimer(Server defaultServer) {
         mView.secondsRemain = 60;
         mView.secondsRemain = 60;
         mView.h.postDelayed(new TimerForSync(defaultServer), 1000);
     }
+
     private float pathMoved() {
         return (x - startingX) * (x - startingX) + (y - startingY) * (y - startingY);
     }

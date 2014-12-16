@@ -7,20 +7,15 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Window;
+import android.widget.Toast;
+
+import java.util.Date;
+import java.util.List;
 
 public class MainActivity extends ActionBarActivity {
 
     MainView view;
-    public static final String WIDTH = "width";
-    public static final String HEIGHT = "height";
-    public static final String SCORE = "score";
-    public static final String HIGH_SCORE = "high score temp";
-    public static final String UNDO_SCORE = "undo score";
-    public static final String CAN_UNDO = "can undo";
-    public static final String UNDO_GRID = "undo";
-    public static final String GAME_STATE = "game state";
-    public static final String UNDO_GAME_STATE = "undo game state";
-
+    boolean screenLocked = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +37,10 @@ public class MainActivity extends ActionBarActivity {
     }
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (screenLocked) {
+            Toast.makeText(this, "Screen is locked during sync.", Toast.LENGTH_LONG).show();
+            super.onKeyDown(keyCode, event);
+        }
         if ( keyCode == KeyEvent.KEYCODE_MENU) {
             //Do nothing
             return true;
@@ -76,75 +75,57 @@ public class MainActivity extends ActionBarActivity {
         //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         //SharedPreferences.Editor editor = settings.edit();
         NimbusStorage settings = new NimbusStorage(this);
-        NimbusStorage.CoordinateReader coordinateReader = settings.coordinateReader();
+        List<NimbusStorage.Snapshot> snapshots = settings.getSnapshots();
+        NimbusStorage.Snapshot snapshotInStorage = null;
+        if (settings.getSnapshots().size()>=1) {
+            snapshotInStorage = snapshots.get(0);
+        }
         // Check whether data changed
-        boolean differentFromStorage = false;
+        NimbusStorage.Snapshot newSnapshot = settings.newSnapshot();
+        NimbusStorage.Snapshot undoSnapshot = null;
+        if (view.game.canUndo) {
+            undoSnapshot = settings.newSnapshot();
+        }
+        newSnapshot.setSize(view.game.grid.field.length);
+        if (view.game.canUndo) {
+            undoSnapshot.setSize(view.game.grid.field.length);
+        }
         for (int xx = 0; xx < view.game.grid.field.length; xx++) {
-            if (differentFromStorage) {
-                break;
-            }
             for (int yy = 0; yy < view.game.grid.field[0].length; yy++) {
-                int value = coordinateReader.getCoordinate(xx + " " + yy, -1);
-                if (value > 0 &&
-                        (view.game.grid.field[xx][yy] == null ||
-                                value != view.game.grid.field[xx][yy].getValue())) {
-                    differentFromStorage = true;
-                    break;
-                } else if (value == 0 && view.game.grid.field[xx][yy] != null) {
-                    differentFromStorage = true;
-                    break;
-                }
-
-                int undoValue = coordinateReader.getUndoCoordinate(UNDO_GRID + xx + " " + yy, -1);
-                if (undoValue > 0 &&
-                        (view.game.grid.undoField[xx][yy] == null ||
-                                undoValue != view.game.grid.undoField[xx][yy].getValue())) {
-                    differentFromStorage = true;
-                     break;
-                } else if (undoValue == 0 && view.game.grid.undoField[xx][yy] != null) {
-                    differentFromStorage = true;
-                    break;
+                Tile point = view.game.grid.field[xx][yy];
+                int value = point == null ? 0 : point.getValue();
+                newSnapshot.putPoint(xx + " " + yy, value);
+                if (view.game.canUndo) {
+                    Tile undoPoint = view.game.grid.undoField[xx][yy];
+                    int undoValue = undoPoint == null ? 0 : undoPoint.getValue();
+                    undoSnapshot.putPoint(xx + " " + yy, undoValue);
                 }
             }
         }
+        long now = new Date().getTime();
+        if (view.game.canUndo) {
+            undoSnapshot.setCreateAt(now);
+            undoSnapshot.setScore(view.game.lastScore);
+            undoSnapshot.setState(view.game.lastGameState);
+        }
+        newSnapshot.setCreateAt(now+1);
+        newSnapshot.setScore(view.game.score);
+        newSnapshot.setState(view.game.gameState);
 
-        if (view.game.score != settings.getLong(SCORE, 0)) {
-            differentFromStorage = true;
-        }
-        if (view.game.highScore != settings.getLong(HIGH_SCORE, 0)) {
-            differentFromStorage = true;
-        };
-        if (!differentFromStorage) {
-            return;
-        }
         // only save if current data is different from the storage
-        NimbusStorage.Editor editor = settings.edit();
-        Tile[][] field = view.game.grid.field;
-        Tile[][] undoField = view.game.grid.undoField;
-        editor.putInt(WIDTH, field.length);
-        editor.putInt(HEIGHT, field.length);
-        for (int xx = 0; xx < field.length; xx++) {
-            for (int yy = 0; yy < field[0].length; yy++) {
-                if (field[xx][yy] != null) {
-                    editor.putCoordinate(xx + " " + yy, field[xx][yy].getValue());
-                } else {
-                    editor.putCoordinate(xx + " " + yy, 0);
-                }
-
-                if (undoField[xx][yy] != null) {
-                    editor.putUndoCoordinate(UNDO_GRID + xx + " " + yy, undoField[xx][yy].getValue());
-                } else {
-                    editor.putUndoCoordinate(UNDO_GRID + xx + " " + yy, 0);
-                }
+        if (!newSnapshot.equals(snapshotInStorage)) {
+            if (view.game.canUndo) {
+                undoSnapshot.create();
             }
+            newSnapshot.create();
+            settings.clearSnapshotTable();
+
         }
-        editor.putLong(SCORE, view.game.score);
-        editor.putLong(HIGH_SCORE, view.game.highScore);
-        editor.putLong(UNDO_SCORE, view.game.lastScore);
-        editor.putBoolean(CAN_UNDO, view.game.canUndo);
-        editor.putInt(GAME_STATE, view.game.gameState);
-        editor.putInt(UNDO_GAME_STATE, view.game.lastGameState);
-        editor.commit();
+        long highScoreInStorage = settings.getHighScore(0);
+        if (view.game.highScore > highScoreInStorage) {
+            settings.recordHighScore(view.game.highScore);
+            settings.clearHighScoreTable();
+        }
         settings.close();
     }
 
@@ -162,39 +143,59 @@ public class MainActivity extends ActionBarActivity {
         //Stopping all animations
         view.game.aGrid.cancelAnimations();
         NimbusStorage settings = new NimbusStorage(this);
-        NimbusStorage.CoordinateReader coordinateReader = settings.coordinateReader();
+        List<NimbusStorage.Snapshot> snapshots = settings.getSnapshots();
+        NimbusStorage.Snapshot latest = null,undoSnapshot = null;
+        if (snapshots.size()>=1) {
+            latest = snapshots.get(0);
+        }
+        if (snapshots.size()>=2) {
+            undoSnapshot = snapshots.get(1);
+        }
+        NimbusStorage.CoordinateReader coordinateReader = null;
+        if (latest != null) {
+            coordinateReader = latest.pointsReader();
+        }
+        NimbusStorage.CoordinateReader undoCoordinateReader = null;
+        if (undoSnapshot != null) {
+            undoCoordinateReader = undoSnapshot.pointsReader();
+        }
         //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         for (int xx = 0; xx < view.game.grid.field.length; xx++) {
             for (int yy = 0; yy < view.game.grid.field[0].length; yy++) {
-                int value = coordinateReader.getCoordinate(xx + " " + yy, -1);
+                int value = -1;
+                if (coordinateReader != null) {
+                    value = coordinateReader.getCoordinate(xx + " " + yy, -1);
+                }
                 if (value > 0) {
                     view.game.grid.field[xx][yy] = new Tile(xx, yy, value);
                 } else if (value == 0) {
                     view.game.grid.field[xx][yy] = null;
                 }
 
-                int undoValue = coordinateReader.getUndoCoordinate(UNDO_GRID + xx + " " + yy, -1);
+                int undoValue = -1;
+                if (undoCoordinateReader != null) {
+                    undoValue = undoCoordinateReader.getCoordinate(xx + " " + yy, -1);
+                }
                 if (undoValue > 0) {
                     view.game.grid.undoField[xx][yy] = new Tile(xx, yy, undoValue);
-                } else if (value == 0) {
+                } else if (undoValue == 0) {
                     view.game.grid.undoField[xx][yy] = null;
                 }
             }
         }
 
-        view.game.score = settings.getLong(SCORE, view.game.score);
+        view.game.score = latest == null?view.game.score:latest.getScore();
         // update high score
         long highScore = view.game.getHighScore();
-        long highScoreTemp = settings.getLong(HIGH_SCORE, view.game.highScore);
-        if (highScoreTemp > highScore) {
-            view.game.highScore = highScoreTemp;
+        if (view.game.highScore > highScore) {
+            view.game.recordHighScore();
         } else {
             view.game.highScore = highScore;
         }
-        view.game.lastScore = settings.getLong(UNDO_SCORE, view.game.lastScore);
-        view.game.canUndo = settings.getBoolean(CAN_UNDO, view.game.canUndo);
-        view.game.gameState = settings.getInt(GAME_STATE, view.game.gameState);
-        view.game.lastGameState = settings.getInt(UNDO_GAME_STATE, view.game.lastGameState);
+        view.game.lastScore = undoSnapshot == null?view.game.lastScore:undoSnapshot.getScore();
+        view.game.canUndo = undoSnapshot == null? view.game.canUndo:true;
+        view.game.gameState = latest == null?view.game.gameState:latest.getState();
+        view.game.lastGameState = undoSnapshot == null? view.game.lastGameState:undoSnapshot.getState();
         view.invalidate();
         settings.close();
     }
