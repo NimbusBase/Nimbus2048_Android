@@ -27,24 +27,23 @@ import java.util.Map;
  */
 public class IndexFragment extends PreferenceFragment {
 
-    private final Map<Server.AuthState, String>
-            sAuthStateText = new HashMap<Server.AuthState, String>(4) {{
-        put(Server.AuthState.In, getString(R.string.state_in));
-        put(Server.AuthState.Out, getString(R.string.state_out));
-        put(Server.AuthState.SigningIn, getString(R.string.state_signing_in));
-        put(Server.AuthState.SigningOut, getString(R.string.state_signing_out));
-    }};
-    private final Map<Boolean, String>
-            sInitStateText = new HashMap<Boolean, String>(2) {{
-        put(true, getString(R.string.state_initialized));
-        put(false, getString(R.string.state_initializing));
-    }};
+    private Map<Server.AuthState, String> sAuthStateText;
+    private Map<Boolean, String>  sInitStateText;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-
+        sAuthStateText = new HashMap<Server.AuthState, String>(4) {{
+            put(Server.AuthState.In, getString(R.string.state_in));
+            put(Server.AuthState.Out, getString(R.string.state_out));
+            put(Server.AuthState.SigningIn, getString(R.string.state_signing_in));
+            put(Server.AuthState.SigningOut, getString(R.string.state_signing_out));
+        }};
+        sInitStateText = new HashMap<Boolean, String>(2) {{
+            put(true, getString(R.string.state_initialized));
+            put(false, getString(R.string.state_initializing));
+        }};
         final Base
                 base = getBase();
         bindEvents(base);
