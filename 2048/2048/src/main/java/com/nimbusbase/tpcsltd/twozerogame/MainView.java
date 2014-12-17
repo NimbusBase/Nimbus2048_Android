@@ -86,6 +86,7 @@ public class MainView extends View {
     static final float INITIAL_VELOCITY = (1 - MERGING_ACCELERATION) / 4;
 
     //Sync button
+    int secondsRemain;
     int syncRotateDegree = 0;
     int syncRotateSpeed = 10;
     int syncPercentage;
@@ -103,7 +104,6 @@ public class MainView extends View {
 
     //Auto sync button
     boolean isAutoSyncOn = false;
-    int secondsRemain = 60;
 
     @Override
     public void onDraw(Canvas canvas) {
@@ -681,6 +681,7 @@ public class MainView extends View {
         Resources resources = context.getResources();
         //Loading resources
         game = new MainGame(context, this);
+        secondsRemain = Singleton.getAutoSyncInterval();
         try {
 
             //Getting assets

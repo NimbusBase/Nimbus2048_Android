@@ -9,6 +9,8 @@ import android.view.KeyEvent;
 import android.view.Window;
 import android.widget.Toast;
 
+import com.nimbusbase.tpcstld.twozerogame.R;
+
 import java.util.Date;
 import java.util.List;
 
@@ -18,12 +20,15 @@ public class MainActivity extends ActionBarActivity {
     boolean screenLocked = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // set up NimbusBase
+        Singleton.CONTEXT = getApplicationContext();
+        Singleton.base();
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         view = new MainView(getBaseContext());
         view.setMainActivity(this);
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        view.hasSaveState = settings.getBoolean("save_state", false);
+        //view.hasSaveState = settings.getBoolean("save_state", false);
 
         if (savedInstanceState != null) {
             if (savedInstanceState.getBoolean("hasState")) {
@@ -31,14 +36,11 @@ public class MainActivity extends ActionBarActivity {
             }
         }
         setContentView(view);
-        // set up NimbusBase
-        Singleton.CONTEXT = getApplicationContext();
-        Singleton.base();
     }
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (screenLocked) {
-            Toast.makeText(this, "Screen is locked during sync.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.screen_lock_hint), Toast.LENGTH_LONG).show();
             super.onKeyDown(keyCode, event);
         }
         if ( keyCode == KeyEvent.KEYCODE_MENU) {
@@ -113,10 +115,10 @@ public class MainActivity extends ActionBarActivity {
         newSnapshot.setState(view.game.gameState);
 
         // only save if current data is different from the storage
-        if (snapshotInStorage!=null && !newSnapshot.equals(snapshotInStorage)) {
-            if (view.game.canUndo) {
+        if (view.game.canUndo && !newSnapshot.equals(snapshotInStorage)) {
+            //if (view.game.canUndo) {
                 undoSnapshot.create();
-            }
+            //}
             newSnapshot.create();
             settings.clearSnapshotTable();
 

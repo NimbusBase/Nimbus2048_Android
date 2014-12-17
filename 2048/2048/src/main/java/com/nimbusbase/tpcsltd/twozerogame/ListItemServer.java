@@ -27,8 +27,8 @@ public class ListItemServer extends SwitchPreference {
             setTitle(server.getCloud());
         }
 
-        setSwitchTextOff("Out");
-        setSwitchTextOn("In");
+        setSwitchTextOff(context.getString(R.string.switch_out));
+        setSwitchTextOn(context.getString(R.string.switch_out));
     }
 
     @Override

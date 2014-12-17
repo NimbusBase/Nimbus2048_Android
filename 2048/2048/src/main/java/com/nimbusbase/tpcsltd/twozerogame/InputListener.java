@@ -12,6 +12,7 @@ import com.nimbusbase.nimbusbase.promise.Callback;
 import com.nimbusbase.nimbusbase.promise.NMBError;
 import com.nimbusbase.nimbusbase.promise.Promise;
 import com.nimbusbase.nimbusbase.promise.Response;
+import com.nimbusbase.tpcstld.twozerogame.R;
 
 import java.util.Objects;
 
@@ -43,7 +44,7 @@ public class InputListener implements View.OnTouchListener {
 
     public boolean onTouch(View view, MotionEvent event) {
         if (mView.getMainActivity().screenLocked) {
-            Toast.makeText(mView.getMainActivity(), "Screen is locked during sync.", Toast.LENGTH_LONG).show();
+            Toast.makeText(mView.getMainActivity(), mView.getMainActivity().getString(R.string.screen_lock_hint), Toast.LENGTH_LONG).show();
             return true;
         }
         switch (event.getAction()) {
@@ -137,7 +138,10 @@ public class InputListener implements View.OnTouchListener {
                         if (!mView.isAutoSyncOn) {
                             mView.getMainActivity().startSyncOptionActivity();
                         } else {
-                            Toast.makeText(mView.getMainActivity(), "Please turn off the AUTO SYNC first.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(
+                                    mView.getMainActivity(),
+                                    mView.getMainActivity().getString(R.string.turn_off_auto_sync_first),
+                                    Toast.LENGTH_LONG).show();
                         }
                     } else if (iconPressed(mView.sXSync, mView.sYIcons)) {
                         String cloudName = Singleton.getDefaultServer();
@@ -153,12 +157,12 @@ public class InputListener implements View.OnTouchListener {
                                 startSync(defaultServer);
                             } else {
                                 Toast.makeText(mView.getMainActivity(),
-                                        "Please select a default server first",
+                                        mView.getMainActivity().getString(R.string.choose_server_first),
                                         Toast.LENGTH_LONG).show();
                             }
                         } else {
                             Toast.makeText(mView.getMainActivity(),
-                                    "Please select a default server first",
+                                    mView.getMainActivity().getString(R.string.choose_server_first),
                                     Toast.LENGTH_LONG).show();
                         }
                     } else if (iconPressed(mView.sXAuto, mView.sYIcons)){
@@ -181,12 +185,12 @@ public class InputListener implements View.OnTouchListener {
                                     startTimer(defaultServer);
                                 } else {
                                     Toast.makeText(mView.getMainActivity(),
-                                            "Please select a default server first",
+                                            mView.getMainActivity().getString(R.string.choose_server_first),
                                             Toast.LENGTH_LONG).show();
                                 }
                             } else {
                                 Toast.makeText(mView.getMainActivity(),
-                                        "Please select a default server first",
+                                        mView.getMainActivity().getString(R.string.choose_server_first),
                                         Toast.LENGTH_LONG).show();
                             }
                         }
@@ -233,7 +237,9 @@ public class InputListener implements View.OnTouchListener {
                                         if (error != null)
                                             Toast.makeText(mView.getMainActivity(), error.toString(), Toast.LENGTH_LONG).show();
                                     } else {
-                                        Toast.makeText(mView.getMainActivity(), "Sync is successful", Toast.LENGTH_LONG).show();
+                                        Toast.makeText(mView.getMainActivity(),
+                                                mView.getMainActivity().getString(R.string.sync_ok),
+                                                Toast.LENGTH_LONG).show();
                                     }
                                     mView.getMainActivity().load();
                                     if (mView.isAutoSyncOn) {
@@ -263,7 +269,7 @@ public class InputListener implements View.OnTouchListener {
                 }
                 if (mView.secondsRemain < 1) {
                     //start sync & reset timer
-                    mView.secondsRemain = 60;
+                    mView.secondsRemain = Singleton.getAutoSyncInterval();
                     startSync(server);
                 }
             }
@@ -272,8 +278,7 @@ public class InputListener implements View.OnTouchListener {
     };
 
     public void startTimer(Server defaultServer) {
-        mView.secondsRemain = 60;
-        mView.secondsRemain = 60;
+        mView.secondsRemain = Singleton.getAutoSyncInterval();
         mView.h.postDelayed(new TimerForSync(defaultServer), 1000);
     }
 

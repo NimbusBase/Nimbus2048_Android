@@ -2,27 +2,23 @@ package com.nimbusbase.tpcsltd.twozerogame;
 
 import android.app.ActionBar;
 import android.os.Bundle;
+import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.nimbusbase.nimbusbase.Base;
 import com.nimbusbase.nimbusbase.Server;
-import com.nimbusbase.nimbusbase.promise.Callback;
-import com.nimbusbase.nimbusbase.promise.NMBError;
-import com.nimbusbase.nimbusbase.promise.Promise;
-import com.nimbusbase.nimbusbase.promise.Response;
 import com.nimbusbase.tpcstld.twozerogame.R;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,17 +27,17 @@ import java.util.Map;
  */
 public class IndexFragment extends PreferenceFragment {
 
-    private static final Map<Server.AuthState, String>
+    private final Map<Server.AuthState, String>
             sAuthStateText = new HashMap<Server.AuthState, String>(4) {{
-        put(Server.AuthState.In, "In");
-        put(Server.AuthState.Out, "Out");
-        put(Server.AuthState.SigningIn, "Signing in");
-        put(Server.AuthState.SigningOut, "Signing out");
+        put(Server.AuthState.In, getString(R.string.state_in));
+        put(Server.AuthState.Out, getString(R.string.state_out));
+        put(Server.AuthState.SigningIn, getString(R.string.state_signing_in));
+        put(Server.AuthState.SigningOut, getString(R.string.state_signing_out));
     }};
-    private static final Map<Boolean, String>
+    private final Map<Boolean, String>
             sInitStateText = new HashMap<Boolean, String>(2) {{
-        put(true, "Initialized");
-        put(false, "Initializing");
+        put(true, getString(R.string.state_initialized));
+        put(false, getString(R.string.state_initializing));
     }};
 
     @Override
@@ -160,7 +156,30 @@ public class IndexFragment extends PreferenceFragment {
 
             onServerStateChange(server, index);
         }
+        EditTextPreference autoSyncIntervalEditText = new EditTextPreference(getActivity());
+        autoSyncIntervalEditText.getEditText().setRawInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL);
+        int seconds = Singleton.getAutoSyncInterval();
+        try {
+            int config = Integer.valueOf(Singleton.getAutoSyncInterval());
+            if ( config>0 ) {
+                seconds = config;
+            }
+        } catch (Throwable e) {
 
+        }
+        autoSyncIntervalEditText.setDefaultValue(String.valueOf(seconds));
+        autoSyncIntervalEditText.setTitle(getString(R.string.auto_sync_interval));
+        autoSyncIntervalEditText.setSummary(seconds + " "+getString(R.string.seconds));
+        autoSyncIntervalEditText.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                Singleton.setAutoSyncInterval(Integer.valueOf(newValue.toString()));
+                setPreferenceScreen(null);
+                initiatePreferenceScreen(getBase(), R.xml.fragment_index);
+                return true;
+            }
+        });
+        serverCate.addPreference(autoSyncIntervalEditText);
         return preferenceScreen;
     }
 
@@ -229,53 +248,8 @@ public class IndexFragment extends PreferenceFragment {
         }
     }
 
-    protected void startSyncOnServer(final Server server, final int index) {
-        final Promise
-                promise = server.synchronize(null);
-        promise
-                .onProgress(new Callback.ProgressListener() {
-                    @Override
-                    public void onProgress(double v) {
-                        onServerSyncProgress(server, index, (float) v);
-                    }
-                })
-                .onAlways(new Callback.AlwaysListener() {
-                    @Override
-                    public void onAlways(Response response) {
-                        onServerSyncEnd(server, index, response);
-                    }
-                });
-
-        final ListItemServer
-                item = (ListItemServer) getServerCategory(getPreferenceScreen()).getPreference(index);
-        if (item != null)
-            item.setSummary(summaryForSyncProgress(0.0f));
-    }
-
-    protected void onServerSyncEnd(Server server, int index, Response response) {
-        if (!response.isSuccess()) {
-            final NMBError
-                    error = response.error;
-            if (error != null)
-                Toast.makeText(getActivity(), error.toString(), Toast.LENGTH_LONG).show();
-        }
-
-        onServerStateChange(server, index);     // Reset summary
-    }
-
-    protected void onServerSyncProgress(Server server, int index, float progress) {
-        final ListItemServer
-                item = (ListItemServer) getServerCategory(getPreferenceScreen()).getPreference(index);
-        if (item != null)
-            item.setSummary(summaryForSyncProgress(progress));
-    }
-
     private PreferenceCategory getServerCategory(PreferenceScreen preferenceScreen) {
         return (PreferenceCategory) preferenceScreen.findPreference(getString(R.string.group_servers));
-    }
-
-    private static String summaryForSyncProgress(float progress) {
-        return String.format("Synchronizing %3.0f%%", progress * 100);
     }
 
     private static Base getBase() {

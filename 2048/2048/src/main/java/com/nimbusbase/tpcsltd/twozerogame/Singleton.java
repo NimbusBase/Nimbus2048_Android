@@ -17,9 +17,19 @@ import java.util.Map;
  */
 public class Singleton {
     public static Context CONTEXT;
-
+    private static  int defaultSyncInterval = 60;
     public static String getDefaultServer() {
         return PreferenceManager.getDefaultSharedPreferences(CONTEXT).getString("defaultServer","");
+    }
+
+    public static Integer getAutoSyncInterval() {
+        return PreferenceManager.getDefaultSharedPreferences(CONTEXT).getInt("autoSyncInterval",defaultSyncInterval);
+    }
+
+    public static void setAutoSyncInterval(int interval) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(CONTEXT).edit();
+        editor.putInt("autoSyncInterval", interval);
+        editor.commit();
     }
 
     public static void setDefaultServer(String defaultServer) {
