@@ -196,7 +196,7 @@ public class InputListener implements View.OnTouchListener {
                         }
                         mView.invalidate();
                     }else if (isTap(2) && inRange(mView.startingX, x, mView.endingX)
-                        && inRange(mView.startingY, x, mView.endingY) && mView.continueButtonEnabled) {
+                            && inRange(mView.startingY, x, mView.endingY) && mView.continueButtonEnabled) {
                         mView.game.setEndlessMode();
                     }
                 }
@@ -212,46 +212,37 @@ public class InputListener implements View.OnTouchListener {
             mView.getMainActivity().save();
             mView.syncPercentage = 0;
             mView.isSyncing = true;
+            mView.invalidate();
             final Promise
                     promise = defaultServer.synchronize(null);
-            AsyncTask syncTask = new AsyncTask<Object, Object, Object>() {
-
-                @Override
-                protected Object doInBackground(Object... params) {
-                    promise
-                            .onProgress(new Callback.ProgressListener() {
-                                @Override
-                                public void onProgress(double v) {
-                                    mView.syncPercentage = (int)Math.ceil(v*100);
-                                    mView.invalidate();
-                                }
-                            })
-                            .onAlways(new Callback.AlwaysListener() {
-                                @Override
-                                public void onAlways(Response response) {
-                                    mView.getMainActivity().screenLocked = false;
-                                    mView.isSyncing = false;
-                                    if (!response.isSuccess()) {
-                                        final NMBError
-                                                error = response.error;
-                                        if (error != null)
-                                            Toast.makeText(mView.getMainActivity(), error.toString(), Toast.LENGTH_LONG).show();
-                                    } else {
-                                        Toast.makeText(mView.getMainActivity(),
-                                                mView.getMainActivity().getString(R.string.sync_ok),
-                                                Toast.LENGTH_LONG).show();
-                                    }
-                                    mView.getMainActivity().load();
-                                    if (mView.isAutoSyncOn) {
-                                        startTimer(defaultServer);
-                                    }
-                                }
-                            });
-                    return null;
-                }
-            };
-            syncTask.execute();
-            mView.invalidate();
+            promise
+                    .onProgress(new Callback.ProgressListener() {
+                        @Override
+                        public void onProgress(double v) {
+                            mView.syncPercentage = (int)Math.ceil(v*100);
+                        }
+                    })
+                    .onAlways(new Callback.AlwaysListener() {
+                        @Override
+                        public void onAlways(Response response) {
+                            mView.getMainActivity().screenLocked = false;
+                            mView.isSyncing = false;
+                            if (!response.isSuccess()) {
+                                final NMBError
+                                        error = response.error;
+                                if (error != null)
+                                    Toast.makeText(mView.getMainActivity(), error.toString(), Toast.LENGTH_LONG).show();
+                            } else {
+                                Toast.makeText(mView.getMainActivity(),
+                                        mView.getMainActivity().getString(R.string.sync_ok),
+                                        Toast.LENGTH_LONG).show();
+                            }
+                            mView.getMainActivity().load();
+                            if (mView.isAutoSyncOn) {
+                                startTimer(defaultServer);
+                            }
+                        }
+                    });
         }
     }
 
