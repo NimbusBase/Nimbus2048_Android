@@ -218,7 +218,7 @@ public class InputListener implements View.OnTouchListener {
             promise
                     .onProgress(new Callback.ProgressListener() {
                         @Override
-                        public void onProgress(double v) {
+                        public void onProgress(float v) {
                             mView.syncPercentage = (int)Math.ceil(v*100);
                         }
                     })
